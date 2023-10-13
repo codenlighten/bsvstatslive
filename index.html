@@ -3,91 +3,95 @@
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<script
+			type="text/javascript"
+			src="https://cdn.jsdelivr.net/gh/centrifugal/centrifuge-js@latest/dist/centrifuge.min.js"
+		></script>
 		<title>BSV Stats Live</title>
 		<style>
 			/* mobile friendly */
 			* {
 				box-sizing: border-box;
 			}
-      body {
-        font-family: Arial, Helvetica, sans-serif;
-        margin: 0;
-        padding: 0;
-        background-color: black;
-        color: whitesmoke;
-      }
+			body {
+				font-family: Arial, Helvetica, sans-serif;
+				margin: 0;
+				padding: 0;
+				background-color: black;
+				color: whitesmoke;
+			}
 			#header {
 				background-color: #00368c;
-        color: #fff;
-        padding: 20px;
-        width: 100%;
+				color: #fff;
+				padding: 20px;
+				width: 100%;
 			}
-      #bsvTransactionsLive {
-        padding: 20px;
-        width: 100%;
-      }
-      #footer {
-        background-color: #00368c;
-        color: #fff;
-        padding: 20px;
-        width: 100%;
-      }
-      #footer p {
-        text-align: center;
-      }
-      .container {
-        width: 80%;
-        margin: 0 auto;
-      }
-      .card {
-        background-color: #fff;
-        color: #000;
-        padding: 20px;
-        margin: 20px 0;
-      }
-      .card-body {
-        height: 400px;
-      }
-      .table {
-        background-color: #fff;
-        color: #000;
-      }
-      .table thead {
-        background-color: #00368c;
-        color: #fff;
-      }
-      .table tbody {
-        background-color: #fff;
-        color: #000;
-      }
-      /* desktop friendly */
-      @media (min-width: 768px) {
-        .container {
-          width: 80%;
-          margin: 0 auto;
-        }
-        .card {
-          background-color: #fff;
-          color: #000;
-          padding: 20px;
-          margin: 20px 0;
-        }
-        .card-body {
-          height: 400px;
-        }
-        .table {
-          background-color: #fff;
-          color: #000;
-        }
-        .table thead {
-          background-color: #00368c;
-          color: #fff;
-        }
-        .table tbody {
-          background-color: #fff;
-          color: #000;
-        }
-      }
+			#bsvTransactionsLive {
+				padding: 20px;
+				width: 100%;
+			}
+			#footer {
+				background-color: #00368c;
+				color: #fff;
+				padding: 20px;
+				width: 100%;
+			}
+			#footer p {
+				text-align: center;
+			}
+			.container {
+				width: 80%;
+				margin: 0 auto;
+			}
+			.card {
+				background-color: #fff;
+				color: #000;
+				padding: 20px;
+				margin: 20px 0;
+			}
+			.card-body {
+				height: 400px;
+			}
+			.table {
+				background-color: #fff;
+				color: #000;
+			}
+			.table thead {
+				background-color: #00368c;
+				color: #fff;
+			}
+			.table tbody {
+				background-color: #fff;
+				color: #000;
+			}
+			/* desktop friendly */
+			@media (min-width: 768px) {
+				.container {
+					width: 80%;
+					margin: 0 auto;
+				}
+				.card {
+					background-color: #fff;
+					color: #000;
+					padding: 20px;
+					margin: 20px 0;
+				}
+				.card-body {
+					height: 400px;
+				}
+				.table {
+					background-color: #fff;
+					color: #000;
+				}
+				.table thead {
+					background-color: #00368c;
+					color: #fff;
+				}
+				.table tbody {
+					background-color: #fff;
+					color: #000;
+				}
+			}
 			@media (max-width: 768px) {
 				.container {
 					width: 100%;
@@ -99,6 +103,9 @@
 	<body>
 		<div class="container" id="header">
 			<h1>BSV Transactions Live</h1>
+		</div>
+		<div class="container" id="statusDiv">
+			<p id="status">Connecting...</p>
 		</div>
 		<div class="container" id="bsvTransactionsLive">
 			<div class="row">
@@ -121,100 +128,76 @@
 					</div>
 				</div>
 			</div>
-      <div class="container" id="footerCopyright2023">
-        <p>&copy; 2023 BSV Stats Live</p>
-      </div>
-		<script
-			type="text/javascript"
-			src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"
-		></script>
-		<script
-			type="text/javascript"
-			src="https://cdn.jsdelivr.net/gh/centrifugal/centrifuge-js@latest/dist/centrifuge.min.js"
-		></script>
-		<script type="text/javascript">
-			$(function () {
-				const centrifuge = new Centrifuge(
-					"wss://socket.whatsonchain.com/mempool"
-				);
-				// data structure. let's show it in a table
-				//         {
-				//   "hex": "02 ...",
-				//   "txid": "20ac30f5aa6aebc0f9e532f32a9691bf7faa332c755d6aea1fd3f6ba36d195e8",
-				//   "hash": "20ac30f5aa6aebc0f9e532f32a9691bf7faa332c755d6aea1fd3f6ba36d195e8",
-				//   "size": 219,
-				//   "version": 2,
-				//   "locktime": 0,
-				//   "vin": [
-				//     {
-				//       "txid": "15b416adf871f9285788ebf36b67714d9e49f413f3a3f083d80e01535bd40433",
-				//       "vout": 1,
-				//       "scriptSig": {
-				//         "asm": "304402204ac1d9f22f09044f66aa6055835b19d5617c19ef180422683b9d168da272e40d022078d3e876f7134eb29cd9e26081feae70f393a1aa3e9926307233f1c419bd1eb641 02a3089907380f086e9d5616ef6e62876a2777ea0c5abca785b15ef92d173afdff",
-				//         "hex": "47304402204ac1d9f22f09044f66aa6055835b19d5617c19ef180422683b9d168da272e40d022078d3e876f7134eb29cd9e26081feae70f393a1aa3e9926307233f1c419bd1eb6412102a3089907380f086e9d5616ef6e62876a2777ea0c5abca785b15ef92d173afdff"
-				//       },
-				//       "sequence": 4294967295
-				//     }
-				//   ],
-				//   "vout": [
-				//     {
-				//       "value": 0,
-				//       "n": 0,
-				//       "scriptPubKey": {
-				//         "asm": "OP_FALSE OP_RETURN 39366665313633626131303138386636",
-				//         "hex": "006a1039366665313633626131303138386636",
-				//         "type": "nulldata",
-				//         "isTruncated": false
-				//       }
-				//     },
-				//     {
-				//       "value": 0.00007511,
-				//       "n": 1,
-				//       "scriptPubKey": {
-				//         "asm": "OP_DUP OP_HASH160 966a0c69734d51307ba0bcfcd9092b51addfaf78 OP_EQUALVERIFY OP_CHECKSIG",
-				//         "hex": "76a914966a0c69734d51307ba0bcfcd9092b51addfaf7888ac",
-				//         "reqSigs": 1,
-				//         "type": "pubkeyhash",
-				//         "addresses": [
-				//           "1EiKQ9qiAkjDn86JvUt6aJpZvETq8uim2D"
-				//         ],
-				//         "isTruncated": false
-				//       }
-				//     }
-				//   ]
-				// }
+		</div>
+		<div class="container" id="footerCopyright2023">
+			<p>&copy; 2023 BSV Stats Live</p>
+		</div>
+		<script>
+					const centrifuge = new Centrifuge("wss://socket.whatsonchain.com/mempool");
 
-				centrifuge.on("publish", function (message) {
-					console.log("Data: " + JSON.stringify(message.data, null, 2));
-					const data = message.data;
-					const txid = data.txid;
-					const time = new Date().toLocaleTimeString();
-					const size = data.size;
-					const vout = data.vout;
-					const value = vout[1].value;
-					const address = vout[1].scriptPubKey.addresses[0];
-					const tableRow = `<tr><td>${time}</td><td>${txid}</td><td>${size}</td><td>${value}</td><td>${address}</td></tr>`;
-					$("#bsvTransactionsLiveTable").prepend(tableRow);
-				});
+			centrifuge.on("publish", function (message) {
+				// console.log("Data: " + JSON.stringify(message.data, null, 2));
 
-				centrifuge.on("disconnect", function (ctx) {
-					console.log(
-						"Disconnected: " +
-							ctx.reason +
-							(ctx.reconnect
-								? ", will try to reconnect"
-								: ", won't try to reconnect")
-					);
-				});
-
-				centrifuge.on("connect", function (ctx) {
-					console.log(
-						"Connected with client ID " + ctx.client + " over " + ctx.transport
-					);
-				});
-
-				centrifuge.connect();
+				const data = message.data;
+								const txid = data.txid;
+								const time = new Date().toLocaleTimeString();
+								const size = data.size;
+								const vout = data.vout;
+								const value = vout[1].value;
+								const address = vout[1].scriptPubKey.addresses[0];
+								const tableRow = `<tr><td>${time}</td><td>${txid}</td><td>${size}</td><td>${value}</td><td>${address}</td></tr>`;
+								document.getElementById("bsvTransactionsLiveTable").innerHTML =
+									tableRow + document.getElementById("bsvTransactionsLiveTable").innerHTML;
+								document.getElementById("txid").innerHTML = txid;
+								document.getElementById("txid").style.display = "block";
+								document.getElementById("cert").style.display = "block";
+								document.getElementById("status").innerHTML = "Connected";
+								document.getElementById("status").style.color = "green";
 			});
+
+			centrifuge.on("disconnect", function (ctx) {
+				document.getElementById("status").innerHTML = "Disconnected";
+				document.getElementById("status").style.color = "red";
+				document.getElementById("txid").style.display = "none";
+				document.getElementById("cert").style.display = "none";
+
+				console.log(
+					"Disconnected: " +
+						ctx.reason +
+						(ctx.reconnect ? ", will try to reconnect" : ", won't try to reconnect")
+				);
+			});
+
+			centrifuge.on("connect", function (ctx) {
+				document.getElementById("status").innerHTML = "Connecting...";
+				document.getElementById("status").style.color = "yellow";
+				document.getElementById("txid").style.display = "none";
+				document.getElementById("cert").style.display = "none";
+
+				console.log(
+					"Connected with client ID " + ctx.client + " over " + ctx.transport
+				);
+			});
+
+			centrifuge.connect();
+							centrifuge.on("disconnect", function (ctx) {
+								console.log(
+									"Disconnected: " +
+										ctx.reason +
+										(ctx.reconnect
+											? ", will try to reconnect"
+											: ", won't try to reconnect")
+								);
+							});
+
+							centrifuge.on("connect", function (ctx) {
+								console.log(
+									"Connected with client ID " + ctx.client + " over " + ctx.transport
+								);
+							});
+
+							centrifuge.connect();
+						});
 		</script>
 	</body>
 </html>
