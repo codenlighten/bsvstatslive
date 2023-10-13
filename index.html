@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>BSV Stats Live</title>
+		<style>
+			/* mobile friendly */
+			* {
+				box-sizing: border-box;
+			}
+			.container {
+				width: 80%;
+				margin: 0 auto;
+				padding: 20px;
+			}
+			h1 {
+				text-align: center;
+			}
+			.card {
+				margin: 20px 0;
+				border: 1px solid #ccc;
+				border-radius: 5px;
+				padding: 10px;
+			}
+			.card-body {
+				height: 300px;
+			}
+			.card-body canvas {
+				height: 100%;
+				width: 100%;
+			}
+			.table {
+				width: 100%;
+				border-collapse: collapse;
+			}
+			.table th,
+			.table td {
+				border: 1px solid #ccc;
+				padding: 5px;
+			}
+			.table th {
+				background-color: #eee;
+			}
+			.table tbody tr:nth-child(odd) {
+				background-color: #eee;
+			}
+			.table tbody tr:nth-child(even) {
+				background-color: #fff;
+			}
+			.table tbody tr:hover {
+				background-color: #ddd;
+			}
+			.table tbody tr td:first-child {
+				width: 100px;
+			}
+			.table tbody tr td:nth-child(2) {
+				width: 200px;
+			}
+			.table tbody tr td:nth-child(3) {
+				width: 100px;
+			}
+			.table tbody tr td:nth-child(4) {
+				width: 100px;
+			}
+			.table tbody tr td:nth-child(5) {
+				width: 200px;
+			}
+
+			@media (max-width: 768px) {
+				.container {
+					width: 100%;
+					padding: 0;
+				}
+			}
+		</style>
+	</head>
+	<body>
+		<div class="container" id="bsvTransactionsLive">
+			<h1>BSV Transactions Live</h1>
+			<div class="row">
+				<div class="col-md-6">
+					<div class="card">
+						<div class="card-body" id="bsvTransactionsLiveChart"></div>
+					</div>
+				</div>
+				<div class="col-md-6">
+					<div class="card">
+						<table class="table table-striped table-hover">
+							<thead>
+								<tr>
+									<th>Time</th>
+									<th>Transactions</th>
+								</tr>
+							</thead>
+							<tbody id="bsvTransactionsLiveTable"></tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+		<script
+			type="text/javascript"
+			src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"
+		></script>
+		<script
+			type="text/javascript"
+			src="https://cdn.jsdelivr.net/gh/centrifugal/centrifuge-js@latest/dist/centrifuge.min.js"
+		></script>
+		<script type="text/javascript">
+			$(function () {
+				const centrifuge = new Centrifuge(
+					"wss://socket.whatsonchain.com/mempool"
+				);
+				// data structure. let's show it in a table
+				//         {
+				//   "hex": "02 ...",
+				//   "txid": "20ac30f5aa6aebc0f9e532f32a9691bf7faa332c755d6aea1fd3f6ba36d195e8",
+				//   "hash": "20ac30f5aa6aebc0f9e532f32a9691bf7faa332c755d6aea1fd3f6ba36d195e8",
+				//   "size": 219,
+				//   "version": 2,
+				//   "locktime": 0,
+				//   "vin": [
+				//     {
+				//       "txid": "15b416adf871f9285788ebf36b67714d9e49f413f3a3f083d80e01535bd40433",
+				//       "vout": 1,
+				//       "scriptSig": {
+				//         "asm": "304402204ac1d9f22f09044f66aa6055835b19d5617c19ef180422683b9d168da272e40d022078d3e876f7134eb29cd9e26081feae70f393a1aa3e9926307233f1c419bd1eb641 02a3089907380f086e9d5616ef6e62876a2777ea0c5abca785b15ef92d173afdff",
+				//         "hex": "47304402204ac1d9f22f09044f66aa6055835b19d5617c19ef180422683b9d168da272e40d022078d3e876f7134eb29cd9e26081feae70f393a1aa3e9926307233f1c419bd1eb6412102a3089907380f086e9d5616ef6e62876a2777ea0c5abca785b15ef92d173afdff"
+				//       },
+				//       "sequence": 4294967295
+				//     }
+				//   ],
+				//   "vout": [
+				//     {
+				//       "value": 0,
+				//       "n": 0,
+				//       "scriptPubKey": {
+				//         "asm": "OP_FALSE OP_RETURN 39366665313633626131303138386636",
+				//         "hex": "006a1039366665313633626131303138386636",
+				//         "type": "nulldata",
+				//         "isTruncated": false
+				//       }
+				//     },
+				//     {
+				//       "value": 0.00007511,
+				//       "n": 1,
+				//       "scriptPubKey": {
+				//         "asm": "OP_DUP OP_HASH160 966a0c69734d51307ba0bcfcd9092b51addfaf78 OP_EQUALVERIFY OP_CHECKSIG",
+				//         "hex": "76a914966a0c69734d51307ba0bcfcd9092b51addfaf7888ac",
+				//         "reqSigs": 1,
+				//         "type": "pubkeyhash",
+				//         "addresses": [
+				//           "1EiKQ9qiAkjDn86JvUt6aJpZvETq8uim2D"
+				//         ],
+				//         "isTruncated": false
+				//       }
+				//     }
+				//   ]
+				// }
+
+				centrifuge.on("publish", function (message) {
+					console.log("Data: " + JSON.stringify(message.data, null, 2));
+					const data = message.data;
+					const txid = data.txid;
+					const time = new Date().toLocaleTimeString();
+					const size = data.size;
+					const vout = data.vout;
+					const value = vout[1].value;
+					const address = vout[1].scriptPubKey.addresses[0];
+					const tableRow = `<tr><td>${time}</td><td>${txid}</td><td>${size}</td><td>${value}</td><td>${address}</td></tr>`;
+					$("#bsvTransactionsLiveTable").prepend(tableRow);
+				});
+
+				centrifuge.on("disconnect", function (ctx) {
+					console.log(
+						"Disconnected: " +
+							ctx.reason +
+							(ctx.reconnect
+								? ", will try to reconnect"
+								: ", won't try to reconnect")
+					);
+				});
+
+				centrifuge.on("connect", function (ctx) {
+					console.log(
+						"Connected with client ID " + ctx.client + " over " + ctx.transport
+					);
+				});
+
+				centrifuge.connect();
+			});
+		</script>
+	</body>
+</html>
