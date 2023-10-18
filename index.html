@@ -133,46 +133,41 @@
 			<p>&copy; 2023 BSV Stats Live</p>
 		</div>
 		<script>
-					const centrifuge = new Centrifuge("wss://socket.whatsonchain.com/mempool");
+			const centrifuge = new Centrifuge(
+				"wss://socket.whatsonchain.com/mempool"
+			);
 
 			centrifuge.on("publish", function (message) {
 				// console.log("Data: " + JSON.stringify(message.data, null, 2));
 
 				const data = message.data;
-								const txid = data.txid;
-								const time = new Date().toLocaleTimeString();
-								const size = data.size;
-								const vout = data.vout;
-								const value = vout[1].value;
-								const address = vout[1].scriptPubKey.addresses[0];
-								const tableRow = `<tr><td>${time}</td><td>${txid}</td><td>${size}</td><td>${value}</td><td>${address}</td></tr>`;
-								document.getElementById("bsvTransactionsLiveTable").innerHTML =
-									tableRow + document.getElementById("bsvTransactionsLiveTable").innerHTML;
-								document.getElementById("txid").innerHTML = txid;
-								document.getElementById("txid").style.display = "block";
-								document.getElementById("cert").style.display = "block";
-								document.getElementById("status").innerHTML = "Connected";
-								document.getElementById("status").style.color = "green";
+				const txid = data.txid;
+				const time = new Date().toLocaleTimeString();
+				const tableRow = `<tr><td>${time}</td><td>${txid}</td></tr>`;
+				document.getElementById("bsvTransactionsLiveTable").innerHTML =
+					tableRow +
+					document.getElementById("bsvTransactionsLiveTable").innerHTML;
+
+				document.getElementById("status").innerHTML = "Connected";
+				document.getElementById("status").style.color = "green";
 			});
 
 			centrifuge.on("disconnect", function (ctx) {
 				document.getElementById("status").innerHTML = "Disconnected";
 				document.getElementById("status").style.color = "red";
-				document.getElementById("txid").style.display = "none";
-				document.getElementById("cert").style.display = "none";
 
 				console.log(
 					"Disconnected: " +
 						ctx.reason +
-						(ctx.reconnect ? ", will try to reconnect" : ", won't try to reconnect")
+						(ctx.reconnect
+							? ", will try to reconnect"
+							: ", won't try to reconnect")
 				);
 			});
 
 			centrifuge.on("connect", function (ctx) {
-				document.getElementById("status").innerHTML = "Connecting...";
-				document.getElementById("status").style.color = "yellow";
-				document.getElementById("txid").style.display = "none";
-				document.getElementById("cert").style.display = "none";
+				document.getElementById("status").innerHTML = "Connected";
+				document.getElementById("status").style.color = "green";
 
 				console.log(
 					"Connected with client ID " + ctx.client + " over " + ctx.transport
@@ -180,24 +175,6 @@
 			});
 
 			centrifuge.connect();
-							centrifuge.on("disconnect", function (ctx) {
-								console.log(
-									"Disconnected: " +
-										ctx.reason +
-										(ctx.reconnect
-											? ", will try to reconnect"
-											: ", won't try to reconnect")
-								);
-							});
-
-							centrifuge.on("connect", function (ctx) {
-								console.log(
-									"Connected with client ID " + ctx.client + " over " + ctx.transport
-								);
-							});
-
-							centrifuge.connect();
-						});
 		</script>
 	</body>
 </html>
