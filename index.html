@@ -138,12 +138,14 @@
 			);
 
 			centrifuge.on("publish", function (message) {
-				// console.log("Data: " + JSON.stringify(message.data, null, 2));
-
 				const data = message.data;
 				const txid = data.txid;
 				const time = new Date().toLocaleTimeString();
-				const tableRow = `<tr><td>${time}</td><td>${txid}</td></tr>`;
+				const size = data.size;
+				const value = data.vout[1].value;
+				const address = data.vout[1].scriptPubKey.addresses[0];
+
+				const tableRow = `<tr><td>${time}</td><td>${txid}</td><td>${size}</td><td>${value}</td><td>${address}</td></tr>`;
 				document.getElementById("bsvTransactionsLiveTable").innerHTML =
 					tableRow +
 					document.getElementById("bsvTransactionsLiveTable").innerHTML;
